@@ -117,6 +117,7 @@ imgInput.addEventListener("change", (event) => {
         imageCanvas.width = img.width;
         imageCanvas.height = img.height;
         canvasCtx.drawImage(img, 0, 0, imageCanvas.width, imageCanvas.height);
+        console.log(localStorage.setItem("image", imageCanvas.toDataURL(file.type)))
     };
 })
 
@@ -134,6 +135,7 @@ function applyFilters() {
     invert(${filters.invert.value}${filters.invert.unit})
     `.trim();
     canvasCtx.drawImage(image, 0, 0);
+    localStorage.setItem("filters", JSON.stringify(filters));
 }
 
 resetBtn.addEventListener("click", () => {
@@ -199,6 +201,7 @@ resetBtn.addEventListener("click", () => {
     filterContainer.innerHTML = "";
 
     createFilters()
+    // localStorage.removeItem("image");x
 
 });
 
@@ -330,7 +333,7 @@ Object.keys(Presets).forEach((presetName) => {
 
     presetBtn.addEventListener("click", () => {
         const preset = Presets[presetName];
-        
+
         Object.keys(preset).forEach((filterName) => {
             filters[filterName].value = preset[filterName];
         });
@@ -342,3 +345,25 @@ Object.keys(Presets).forEach((presetName) => {
     })
 
 })
+
+window.addEventListener("load", () => {
+    const savedImage = localStorage.getItem("image");
+    const savedFilters = localStorage.getItem("filters");
+    if (!savedImage) return;
+
+    const img = new Image();
+    img.src = savedImage;
+
+    img.onload = () => {
+        image = img;
+        imageCanvas.width = img.width;
+        imageCanvas.height = img.height;
+        canvasCtx.drawImage(img, 0, 0);
+        filters = JSON.parse(savedFilters);
+        applyFilters();
+        filterContainer.innerHTML = "";
+        createFilters()
+        document.querySelector(".placeholder").style.display = "none";
+        imageCanvas.style.display = "block";
+    };
+});
